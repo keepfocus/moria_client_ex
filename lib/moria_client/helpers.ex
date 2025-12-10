@@ -25,6 +25,12 @@ defmodule MoriaClient.Helpers do
     opts
     |> Keyword.filter(fn {k, _v} -> k == key end)
     |> Keyword.values()
+    |> Enum.flat_map(fn
+      [] -> []
+      [{key, _value} | _] = filter when is_atom(key) -> [filter]
+      [_ | _] = filters -> filters
+      other -> [other]
+    end)
     |> encode_filters()
   end
 
