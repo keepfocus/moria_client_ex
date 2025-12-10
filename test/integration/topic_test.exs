@@ -13,19 +13,48 @@ defmodule Integration.TopicTest do
     topic_ref_2 = "integration-test-topic-#{ctx.actor.id}-2"
 
     {:ok, topic_1} =
-      MoriaClient.create_topic(ctx.client, %{reference: topic_ref_1, namespace_id: namespace.id})
+      MoriaClient.create_topic(ctx.client, %{
+        reference: topic_ref_1,
+        namespace_id: namespace.id,
+        metadata: [%{key: "foo", value: "bar"}]
+      })
 
     assert topic_1.reference == topic_ref_1
 
     {:ok, topic_2} =
-      MoriaClient.create_topic(ctx.client, %{reference: topic_ref_2, namespace_id: namespace.id})
+      MoriaClient.create_topic(ctx.client, %{
+        reference: topic_ref_2,
+        namespace_id: namespace.id,
+        metadata: [%{key: "foo", value: "baz"}]
+      })
 
     # can list topics and find created ones
     {:ok, page} = MoriaClient.list_topics(ctx.client)
     assert Enum.all?(page.topics, fn t -> t.id in [topic_1.id, topic_2.id] end)
 
-    # can update topic
+    # can paginate topics
+    assert {:ok, page_1} =
+             MoriaClient.list_topics(ctx.client,
+               first: 1,
+               after: nil,
+               filter: %{field: :metadata, value: "foo"}
+             )
 
+    assert page_1.page.has_next_page
+    assert %{topics: [%{reference: ^topic_ref_1}]} = page_1
+
+    # next page
+    assert {:ok, page_2} =
+             MoriaClient.list_topics(ctx.client,
+               first: 1,
+               after: page_1.page.end_cursor,
+               filter: %{field: :metadata, value: "foo"}
+             )
+
+    refute page_2.page.has_next_page
+    assert %{topics: [%{reference: ^topic_ref_2}]} = page_2
+
+    # can update topic
     {:ok, updated_topic} =
       MoriaClient.update_topic(ctx.client, topic_1.id, %{description: "updated"})
 
