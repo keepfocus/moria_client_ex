@@ -1,0 +1,16 @@
+defmodule MoriaClient.Topics.TopicsPage do
+  use MoriaClient.Schema
+
+  @primary_key false
+  embedded_schema do
+    embeds_one :page, MoriaClient.Common.PageInfo
+    embeds_many :topics, MoriaClient.Topics.Topic
+  end
+
+  def changeset(page \\ %__MODULE__{}, attrs) do
+    page
+    |> Ecto.Changeset.cast(attrs, [])
+    |> Ecto.Changeset.cast_embed(:page)
+    |> Ecto.Changeset.cast_embed(:topics)
+  end
+end
