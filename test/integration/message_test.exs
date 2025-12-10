@@ -67,6 +67,16 @@ defmodule Integration.MessageTest do
     assert {:ok, paged_page} =
              MoriaClient.list_messages(ctx.client, topic_a.id, first: 3, after: cursor)
 
+    # can stream messages via stream_messages/3
+    assert [
+             %{id: ^id1},
+             %{id: ^id2},
+             %{id: ^id3},
+             %{id: ^id5}
+           ] =
+             MoriaClient.stream_messages!(ctx.client, topic_a.id, first: 3)
+             |> Enum.to_list()
+
     # the final message should be on this page
     assert length(paged_page.messages) == 1
     assert [id5] == Enum.map(paged_page.messages, & &1.id)

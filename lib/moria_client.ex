@@ -28,6 +28,7 @@ defmodule MoriaClient do
   ## Namespaces
   ##
   defdelegate list_namespaces(client, opts \\ []), to: MoriaClient.Namespaces
+  defdelegate stream_namespaces!(client, opts \\ []), to: MoriaClient.Namespaces
   defdelegate get_namespace(client, namespace_id), to: MoriaClient.Namespaces
   defdelegate create_namespace(client, params), to: MoriaClient.Namespaces
   defdelegate delete_namespace(client, id), to: MoriaClient.Namespaces
@@ -36,6 +37,7 @@ defmodule MoriaClient do
   ## Topics
   ##
   defdelegate list_topics(client, opts \\ []), to: MoriaClient.Topics
+  defdelegate stream_topics!(client, opts \\ []), to: MoriaClient.Topics
   defdelegate get_topic(client, topic_id), to: MoriaClient.Topics
   defdelegate create_topic(client, params), to: MoriaClient.Topics
   defdelegate update_topic(client, topic_id, params), to: MoriaClient.Topics
@@ -64,6 +66,7 @@ defmodule MoriaClient do
   ##
 
   defdelegate list_messages(client, topic_id, opts \\ []), to: MoriaClient.Messages
+  defdelegate stream_messages!(client, topic_id, opts \\ []), to: MoriaClient.Messages
   defdelegate create_messages(client, params), to: MoriaClient.Messages
 
   ##

@@ -54,6 +54,18 @@ defmodule Integration.TopicTest do
     refute page_2.page.has_next_page
     assert %{topics: [%{reference: ^topic_ref_2}]} = page_2
 
+    # Can stream topics via stream_topics/2
+    # (we set first: 1 to force multiple pages)
+    assert [
+             %{reference: ^topic_ref_1},
+             %{reference: ^topic_ref_2}
+           ] =
+             MoriaClient.stream_topics!(ctx.client,
+               first: 1,
+               filter: %{field: :metadata, value: "foo"}
+             )
+             |> Enum.to_list()
+
     # can update topic
     {:ok, updated_topic} =
       MoriaClient.update_topic(ctx.client, topic_1.id, %{description: "updated"})

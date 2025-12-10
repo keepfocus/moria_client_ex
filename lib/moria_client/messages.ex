@@ -18,4 +18,9 @@ defmodule MoriaClient.Messages do
       MoriaClient.Helpers.to_schema(env.body, MoriaClient.Messages.MessagesPage)
     end
   end
+
+  def stream_messages!(client, topic_id, opts \\ []) do
+    Helpers.stream_pages(&list_messages(client, topic_id, &1), opts)
+    |> Stream.flat_map(& &1.messages)
+  end
 end

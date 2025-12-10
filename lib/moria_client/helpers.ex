@@ -55,4 +55,35 @@ defmodule MoriaClient.Helpers do
 
   def handle_common_errors(%{status: 422} = env),
     do: {:error, Errors.Unprocessable.from_env!(env)}
+
+  @doc """
+  Stream paginated results from a page function that returns {:ok, page} tuples.
+
+  This can be used with any function that takes a single opts argument and
+  returns paginated results in the form of {:ok, page},
+  where `page` contains a `page` map with `end_cursor` and `has_next_page` fields.
+
+  This is commonly done with listing functions by `&MoriaClient.list_<resource>(client, &1)`.
+
+  NOTE: This function throws `{:error, reason}` if it encounters an error from the page function.
+
+  NOTE: This only works with forward pagination (using `after` cursors and `first` limits).
+  """
+  def stream_pages(page_fun, opts) do
+    Stream.unfold(nil, fn
+      :halt ->
+        nil
+
+      cursor ->
+        pagination = if(cursor, do: [after: cursor], else: [])
+
+        case page_fun.(Keyword.merge(opts, pagination)) do
+          {:ok, %{page: %{end_cursor: next_cursor, has_next_page: has_next_page}} = page} ->
+            {page, if(has_next_page, do: next_cursor, else: :halt)}
+
+          {:error, reason} ->
+            throw({:error, reason})
+        end
+    end)
+  end
 end

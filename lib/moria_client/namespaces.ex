@@ -11,6 +11,11 @@ defmodule MoriaClient.Namespaces do
     end
   end
 
+  def stream_namespaces!(client, opts) do
+    Helpers.stream_pages(&list_namespaces(client, &1), opts)
+    |> Stream.flat_map(& &1.namespaces)
+  end
+
   def get_namespace(client, namespace_id) do
     url = "/api/v1/namespaces/#{namespace_id}"
     req = [method: :get, url: url]

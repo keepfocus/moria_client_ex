@@ -11,6 +11,11 @@ defmodule MoriaClient.Topics do
     end
   end
 
+  def stream_topics!(client, opts) do
+    Helpers.stream_pages(&list_topics(client, &1), opts)
+    |> Stream.flat_map(& &1.topics)
+  end
+
   def get_topic(client, topic_id) do
     url = "/api/v1/topics/#{topic_id}"
     req = [method: :get, url: url]
