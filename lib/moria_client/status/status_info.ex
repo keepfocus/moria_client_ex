@@ -5,7 +5,7 @@ defmodule MoriaClient.Status.StatusInfo do
   embedded_schema do
     field :authorized, :boolean
     field :status, Ecto.Enum, values: [ok: "OK"]
-    field :server_version, :string
+    field :version, :string
   end
 
   def changeset(page \\ %__MODULE__{}, attrs) do
