@@ -37,7 +37,7 @@ defmodule Integration.TopicTest do
              MoriaClient.list_topics(ctx.client,
                first: 1,
                after: nil,
-               filter: %{field: :metadata, value: "foo"}
+               filters: [%{field: :metadata, value: "foo"}]
              )
 
     assert page_1.page.has_next_page
@@ -48,8 +48,7 @@ defmodule Integration.TopicTest do
              MoriaClient.list_topics(ctx.client,
                first: 1,
                after: page_1.page.end_cursor,
-               # this also tests that filter can be a list of filters
-               filter: [%{field: :metadata, value: "foo"}]
+               filters: [%{field: :metadata, value: "foo"}]
              )
 
     refute page_2.page.has_next_page
@@ -63,7 +62,7 @@ defmodule Integration.TopicTest do
            ] =
              MoriaClient.stream_topics!(ctx.client,
                first: 1,
-               filter: %{field: :metadata, value: "foo"}
+               filters: [%{field: :metadata, value: "foo"}]
              )
              |> Enum.to_list()
 

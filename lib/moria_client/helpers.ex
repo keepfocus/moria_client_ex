@@ -11,37 +11,34 @@ defmodule MoriaClient.Helpers do
     |> Ecto.Changeset.apply_action(:validate_server_response)
   end
 
-  def encode_filters(filters) when is_list(filters) do
-    filters
-    |> Enum.with_index()
-    |> Enum.reduce([], fn {filter_map, idx}, acc ->
-      Enum.reduce(filter_map, acc, fn {field, value}, acc ->
-        [{"filters[#{idx}][#{field}]", to_string(value)} | acc]
-      end)
+  def flatten_query_pairs({key, value})
+      when is_binary(value) or is_number(value) or is_boolean(value) or is_atom(value) do
+    [{to_string(key), to_string(value)}]
+  end
+
+  def flatten_query_pairs({key, value}) when is_map(value) do
+    Enum.flat_map(value, fn {k, v} -> flatten_query_pairs({"#{key}[#{k}]", v}) end)
+  end
+
+  def flatten_query_pairs({key, value}) when is_list(value) do
+    Enum.flat_map(Enum.with_index(value), fn {v, idx} ->
+      flatten_query_pairs({"#{key}[#{idx}]", v})
     end)
   end
 
-  def flop_filter_pairs(opts, key \\ :filter) when is_list(opts) do
-    opts
-    |> Keyword.filter(fn {k, _v} -> k == key end)
-    |> Keyword.values()
-    |> Enum.flat_map(fn
-      [] -> []
-      [{key, _value} | _] = filter when is_atom(key) -> [filter]
-      [_ | _] = filters -> filters
-      other -> [other]
-    end)
-    |> encode_filters()
-  end
+  def to_query(opts) do
+    # detect duplicate (outer)keys and raise
+    keys = Enum.map(opts, fn {k, _v} -> k end)
+    uniq_keys = Enum.uniq(keys)
+    duplicate_keys = Enum.uniq(keys -- uniq_keys)
 
-  def flop_pagination_pairs(opts) when is_list(opts) do
+    if duplicate_keys != [] do
+      raise ArgumentError, "Duplicate query keys in #{inspect(duplicate_keys)}"
+    end
+
     opts
-    |> Keyword.take([:first, :after, :last, :before, :limit, :offset, :page_size, :page])
+    |> Enum.flat_map(&flatten_query_pairs/1)
     |> Enum.map(fn {k, v} -> {to_string(k), to_string(v)} end)
-  end
-
-  def flop_query(opts) do
-    flop_filter_pairs(opts) ++ flop_pagination_pairs(opts)
   end
 
   def handle_common_errors(%{status: 400} = env),

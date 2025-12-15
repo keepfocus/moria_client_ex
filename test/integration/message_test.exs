@@ -80,5 +80,13 @@ defmodule Integration.MessageTest do
     # the final message should be on this page
     assert length(paged_page.messages) == 1
     assert [id5] == Enum.map(paged_page.messages, & &1.id)
+
+    assert {:ok, page} =
+             MoriaClient.list_messages(ctx.client, topic_a.id, first: 2, components: %{debug: ""})
+
+    assert [
+             %{components: %{"debug" => %{"errors" => [], "result" => _}}},
+             %{components: %{"debug" => %{"errors" => [], "result" => _}}}
+           ] = page.messages
   end
 end

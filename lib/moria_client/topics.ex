@@ -4,7 +4,7 @@ defmodule MoriaClient.Topics do
 
   def list_topics(client, opts) do
     url = "/api/v1/topics"
-    req = [method: :get, url: url, query: Helpers.flop_query(opts)]
+    req = [method: :get, url: url, query: Helpers.to_query(opts)]
 
     with {:ok, env} <- Common.request(client, req, [200]) do
       Helpers.to_schema(env.body, MoriaClient.Topics.TopicsPage)

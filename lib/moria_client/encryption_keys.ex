@@ -4,7 +4,7 @@ defmodule MoriaClient.EncryptionKeys do
 
   def list_encryption_keys(client, namespace_id, opts) do
     url = "/api/v1/namespaces/#{namespace_id}/encryption_keys"
-    req = [method: :get, url: url, query: Helpers.flop_query(opts)]
+    req = [method: :get, url: url, query: Helpers.to_query(opts)]
 
     with {:ok, env} <- Common.request(client, req, [200]) do
       Helpers.to_schema(env.body, MoriaClient.EncryptionKeys.EncryptionKeysPage)

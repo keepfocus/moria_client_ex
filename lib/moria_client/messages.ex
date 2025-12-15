@@ -12,7 +12,7 @@ defmodule MoriaClient.Messages do
 
   def list_messages(client, topic_id, opts \\ []) do
     url = "/api/v1/topics/#{topic_id}/messages"
-    req = [method: :get, url: url, query: Helpers.flop_query(opts)]
+    req = [method: :get, url: url, query: Helpers.to_query(opts)]
 
     with {:ok, env} <- MoriaClient.Common.request(client, req, [200]) do
       MoriaClient.Helpers.to_schema(env.body, MoriaClient.Messages.MessagesPage)
