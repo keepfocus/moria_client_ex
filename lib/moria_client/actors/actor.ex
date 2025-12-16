@@ -1,6 +1,15 @@
 defmodule MoriaClient.Actors.Actor do
   use MoriaClient.Schema
 
+  @type t :: %__MODULE__{
+          name: String.t(),
+          description: String.t(),
+          inserted_at: DateTime.t(),
+          updated_at: DateTime.t(),
+          token: String.t() | nil,
+          accesses: [MoriaClient.Namespaces.NamespaceAccess.t()]
+        }
+
   embedded_schema do
     field :name, :string
     field :description, :string

@@ -1,6 +1,14 @@
 defmodule MoriaClient.Namespaces.NamespaceAccess do
   use MoriaClient.Schema
 
+  @type t :: %__MODULE__{
+          namespace_id: String.t(),
+          actor_id: String.t(),
+          read: boolean(),
+          write: boolean(),
+          delegate: boolean()
+        }
+
   embedded_schema do
     field :namespace_id, :string
     field :actor_id, :string

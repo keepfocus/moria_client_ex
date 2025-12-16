@@ -1,6 +1,15 @@
 defmodule MoriaClient.Topics.Topic do
   use MoriaClient.Schema
 
+  @type t :: %__MODULE__{
+          reference: String.t(),
+          description: String.t() | nil,
+          namespace_id: String.t(),
+          inserted_at: DateTime.t(),
+          updated_at: DateTime.t(),
+          metadata: [MoriaClient.Common.Metadata.t()]
+        }
+
   embedded_schema do
     field :reference, :string
     field :description, :string

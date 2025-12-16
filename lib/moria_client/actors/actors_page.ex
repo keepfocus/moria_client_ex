@@ -1,6 +1,11 @@
 defmodule MoriaClient.Actors.ActorsPage do
   use MoriaClient.Schema
 
+  @type t :: %__MODULE__{
+          page_info: MoriaClient.Common.PageInfo.t(),
+          actors: [MoriaClient.Actors.Actor.t()]
+        }
+
   @primary_key false
   embedded_schema do
     embeds_one :page_info, MoriaClient.Common.PageInfo

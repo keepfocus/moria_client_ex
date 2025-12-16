@@ -1,6 +1,13 @@
 defmodule MoriaClient.Namespaces.Namespace do
   use MoriaClient.Schema
 
+  @type t :: %__MODULE__{
+          reference: String.t(),
+          inserted_at: DateTime.t(),
+          updated_at: DateTime.t(),
+          metadata: [MoriaClient.Common.Metadata.t()]
+        }
+
   embedded_schema do
     field :reference, :string
     field :inserted_at, :utc_datetime_usec

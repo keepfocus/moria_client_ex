@@ -1,6 +1,13 @@
 defmodule MoriaClient.Common.Metadata do
   use MoriaClient.Schema
 
+  @type t :: %__MODULE__{
+          key: String.t(),
+          value: String.t(),
+          inserted_at: DateTime.t(),
+          updated_at: DateTime.t()
+        }
+
   @primary_key false
   embedded_schema do
     field :key, :string

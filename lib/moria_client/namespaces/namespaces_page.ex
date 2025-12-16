@@ -1,6 +1,11 @@
 defmodule MoriaClient.Namespaces.NamespacesPage do
   use MoriaClient.Schema
 
+  @type t :: %__MODULE__{
+          page: MoriaClient.Common.PageInfo.t(),
+          namespaces: [MoriaClient.Namespaces.Namespace.t()]
+        }
+
   @primary_key false
   embedded_schema do
     embeds_one :page, MoriaClient.Common.PageInfo

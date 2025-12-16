@@ -1,6 +1,11 @@
 defmodule MoriaClient.Topics.TopicsPage do
   use MoriaClient.Schema
 
+  @type t :: %__MODULE__{
+          page: MoriaClient.Common.PageInfo.t(),
+          topics: [MoriaClient.Topics.Topic.t()]
+        }
+
   @primary_key false
   embedded_schema do
     embeds_one :page, MoriaClient.Common.PageInfo

@@ -1,6 +1,15 @@
 defmodule MoriaClient.Messages.Message do
   use MoriaClient.Schema
 
+  @type t :: %__MODULE__{
+          inserted_at: DateTime.t(),
+          captured_at: DateTime.t(),
+          payload_type_id: String.t(),
+          payload_size: integer(),
+          topic_id: String.t(),
+          components: map()
+        }
+
   embedded_schema do
     field :inserted_at, :utc_datetime_usec
     field :captured_at, :utc_datetime_usec

@@ -1,6 +1,13 @@
 defmodule MoriaClient.EncryptionKeys.EncryptionKey do
   use MoriaClient.Schema
 
+  @type t :: %__MODULE__{
+          namespace_id: String.t(),
+          identification_number: String.t(),
+          dlms_flag_id: String.t(),
+          key: String.t()
+        }
+
   embedded_schema do
     field :namespace_id, :string
     field :identification_number, :string

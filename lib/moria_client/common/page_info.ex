@@ -1,6 +1,13 @@
 defmodule MoriaClient.Common.PageInfo do
   use MoriaClient.Schema
 
+  @type t :: %__MODULE__{
+          has_next_page: boolean() | nil,
+          has_previous_page: boolean() | nil,
+          start_cursor: String.t() | nil,
+          end_cursor: String.t() | nil
+        }
+
   @primary_key false
   embedded_schema do
     field :has_next_page, :boolean
