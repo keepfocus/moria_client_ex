@@ -104,7 +104,7 @@ defmodule MoriaClient do
         Tesla.Middleware.Telemetry
       ]
       |> Enum.reject(&is_nil/1),
-      opts[:adapter] || Tesla.Adapter.Mint
+      opts[:adapter] || {Tesla.Adapter.Mint, timeout: 10_000}
     )
   end
 

@@ -12,6 +12,8 @@ defmodule MoriaClient.Topics do
   end
 
   def stream_topics!(client, opts) do
+    opts = Keyword.put_new(opts, :first, 50)
+
     Helpers.stream_pages(&list_topics(client, &1), opts)
     |> Stream.flat_map(& &1.topics)
   end

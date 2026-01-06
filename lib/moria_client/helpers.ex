@@ -73,6 +73,10 @@ defmodule MoriaClient.Helpers do
   NOTE: This only works with forward pagination (using `after` cursors and `first` limits).
   """
   def stream_pages(page_fun, opts) do
+    if not Keyword.has_key?(opts, :first) do
+      raise ArgumentError, "stream_pages/2 requires :first option to be set for pagination"
+    end
+
     Stream.unfold(nil, fn
       :halt ->
         nil
@@ -82,7 +86,28 @@ defmodule MoriaClient.Helpers do
 
         case page_fun.(Keyword.merge(opts, pagination)) do
           {:ok, %{page: %{end_cursor: next_cursor, has_next_page: has_next_page}} = page} ->
-            {page, if(has_next_page, do: next_cursor, else: :halt)}
+            next_cursor =
+              if has_next_page do
+                next_cursor
+              else
+                :halt
+              end
+
+            if has_next_page and is_nil(next_cursor) do
+              raise """
+              Pagination error: next_cursor is nil, but has_next_page is true.
+              This may indicate a bug in the client or server.
+              """
+            end
+
+            if has_next_page and next_cursor == cursor do
+              raise """
+              Pagination error: next_cursor is the same as the previous cursor (#{inspect(cursor)}).
+              This may indicate a bug in the client or server.
+              """
+            end
+
+            {page, next_cursor}
 
           {:error, reason} ->
             throw({:error, reason})

@@ -12,6 +12,8 @@ defmodule MoriaClient.Namespaces do
   end
 
   def stream_namespaces!(client, opts) do
+    opts = Keyword.put_new(opts, :first, 50)
+
     Helpers.stream_pages(&list_namespaces(client, &1), opts)
     |> Stream.flat_map(& &1.namespaces)
   end
