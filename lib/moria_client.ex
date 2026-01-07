@@ -99,13 +99,13 @@ defmodule MoriaClient do
           {:bearer, token} -> {Tesla.Middleware.BearerAuth, token: token}
           _ -> nil
         end,
-        if opts[:trace] do
+        if config[:trace] do
           Tesla.Middleware.Logger
         end,
         Tesla.Middleware.Telemetry
       ]
       |> Enum.reject(&is_nil/1),
-      opts[:adapter] || {Tesla.Adapter.Mint, timeout: 10_000}
+      config[:adapter] || {Tesla.Adapter.Mint, timeout: 10_000}
     )
   end
 
