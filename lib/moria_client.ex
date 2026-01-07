@@ -39,6 +39,7 @@ defmodule MoriaClient do
   defdelegate list_topics(client, opts \\ []), to: MoriaClient.Topics
   defdelegate stream_topics!(client, opts \\ []), to: MoriaClient.Topics
   defdelegate get_topic(client, topic_id), to: MoriaClient.Topics
+  defdelegate get_topic_device_summary(client, topic_id, opts \\ []), to: MoriaClient.Topics
   defdelegate create_topic(client, params), to: MoriaClient.Topics
   defdelegate update_topic(client, topic_id, params), to: MoriaClient.Topics
   defdelegate delete_topic(client, topic_id), to: MoriaClient.Topics

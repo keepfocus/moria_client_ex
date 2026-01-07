@@ -83,4 +83,59 @@ defmodule Integration.TopicTest do
     # deleted topic is no longer found
     {:error, _reason} = MoriaClient.get_topic(ctx.client, topic_1.id)
   end
+
+  test "topic device summary", ctx do
+    {:ok, namespace} =
+      MoriaClient.create_namespace(ctx.client, %{
+        reference: "integration-test-topic-namespace-#{ctx.actor.id}"
+      })
+
+    on_exit(fn -> MoriaClient.delete_namespace(ctx.client, namespace.id) end)
+
+    topic_ref = "integration-test-topic-#{ctx.actor.id}-1"
+
+    {:ok, topic} =
+      MoriaClient.create_topic(ctx.client, %{
+        reference: topic_ref,
+        namespace_id: namespace.id
+      })
+
+    on_exit(fn -> MoriaClient.delete_topic(ctx.client, topic.id) end)
+
+    json = %{
+      "identification" => %{"dlms_flag_id" => "KAM", "identification_number" => "12345678"}
+    }
+
+    assert {:ok, _page} =
+             MoriaClient.create_messages(ctx.client, [
+               %{
+                 topic_id: topic.id,
+                 payload: JSON.encode!(json),
+                 payload_type: "application/json"
+               },
+               %{topic_id: topic.id, payload: "2", payload_type: "text/plain"},
+               %{
+                 topic_id: topic.id,
+                 payload: JSON.encode!(json),
+                 payload_type: "application/json"
+               }
+             ])
+
+    assert {:ok, device_summary} = MoriaClient.get_topic_device_summary(ctx.client, topic.id)
+
+    assert device_summary.processed == 3
+    assert device_summary.missing == 1
+    assert device_summary.failed == 0
+    assert device_summary.identified == 2
+
+    assert [
+             %{
+               identification: %{
+                 dlms_flag_id: "KAM",
+                 identification_number: "12345678"
+               },
+               count: 2
+             }
+           ] = device_summary.devices
+  end
 end

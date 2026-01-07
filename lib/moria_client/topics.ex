@@ -11,6 +11,15 @@ defmodule MoriaClient.Topics do
     end
   end
 
+  def get_topic_device_summary(client, topic_id, opts) do
+    url = "/api/v1/topics/#{topic_id}/device_summary"
+    req = [method: :get, url: url, query: Helpers.to_query(opts)]
+
+    with {:ok, env} <- Common.request(client, req, [200]) do
+      Helpers.to_schema(env.body, MoriaClient.Topics.TopicDeviceSummaryPage)
+    end
+  end
+
   def stream_topics!(client, opts) do
     opts = Keyword.put_new(opts, :first, 50)
 
