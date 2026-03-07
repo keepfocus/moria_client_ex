@@ -14,15 +14,12 @@ defmodule MoriaClient do
   @type t :: Tesla.Client.t()
 
   ##
-  ## Actors
+  ## Machines
   ##
-  # NOT IMPLEMENTED:
-  # defdelegate list_actors(client, opts \\ []), to: MoriaClient.Actors
-  defdelegate get_actor(client, actor_id), to: MoriaClient.Actors
-  defdelegate get_current_actor(client), to: MoriaClient.Actors
-  defdelegate create_actor(client, params), to: MoriaClient.Actors
-  defdelegate update_actor(client, id, params), to: MoriaClient.Actors
-  defdelegate delete_actor(client, id), to: MoriaClient.Actors
+  defdelegate get_machine(client, machine_id), to: MoriaClient.Machines
+  defdelegate create_machine(client, params), to: MoriaClient.Machines
+  defdelegate update_machine(client, id, params), to: MoriaClient.Machines
+  defdelegate delete_machine(client, id), to: MoriaClient.Machines
 
   ##
   ## Namespaces

@@ -1,17 +1,27 @@
 defmodule Integration.EncryptionKeyTest do
   use ExUnit.Case, async: true
   setup {Integration, :setup_client}
+  setup :setup_namespace
+
+  defp setup_namespace(ctx) do
+    idx = :erlang.unique_integer([:positive])
+
+    {:ok, namespace} =
+      MoriaClient.create_namespace(ctx.client, %{
+        reference: "integration-test-encryption-key-namespace-#{ctx.machine.id}-#{idx}"
+      })
+
+    ExUnit.Callbacks.on_exit(fn ->
+      _ = MoriaClient.delete_namespace(ctx.client, namespace.id)
+      :ok
+    end)
+
+    %{namespace: namespace}
+  end
 
   # Encryption Key APIs
   test "encryption keys CRUD", ctx do
-    {:ok, namespace} =
-      MoriaClient.create_namespace(ctx.client, %{
-        reference: "integration-test-encryption-key-namespace-#{ctx.actor.id}"
-      })
-
-    on_exit(fn ->
-      :ok = MoriaClient.delete_namespace(ctx.client, namespace.id)
-    end)
+    namespace = ctx.namespace
 
     params = %{
       base16_key: "AABBCCDDEEFF00112233445566778899",

@@ -1,27 +1,37 @@
 defmodule Integration.MessageTest do
   use ExUnit.Case, async: true
   setup {Integration, :setup_client}
+  setup :setup_namespace
+
+  defp setup_namespace(ctx) do
+    idx = :erlang.unique_integer([:positive])
+
+    {:ok, namespace} =
+      MoriaClient.create_namespace(ctx.client, %{
+        reference: "integration-test-message-namespace-#{ctx.machine.id}-#{idx}"
+      })
+
+    ExUnit.Callbacks.on_exit(fn ->
+      _ = MoriaClient.delete_namespace(ctx.client, namespace.id)
+      :ok
+    end)
+
+    %{namespace: namespace}
+  end
 
   # Message APIs
   test "message CRUD", ctx do
-    {:ok, namespace} =
-      MoriaClient.create_namespace(ctx.client, %{
-        reference: "integration-test-message-namespace-#{ctx.actor.id}"
-      })
-
-    on_exit(fn ->
-      :ok = MoriaClient.delete_namespace(ctx.client, namespace.id)
-    end)
+    namespace = ctx.namespace
 
     {:ok, topic_a} =
       MoriaClient.create_topic(ctx.client, %{
-        reference: "integration-test-message-topic-a-#{ctx.actor.id}",
+        reference: "integration-test-message-topic-a-#{ctx.machine.id}",
         namespace_id: namespace.id
       })
 
     {:ok, topic_b} =
       MoriaClient.create_topic(ctx.client, %{
-        reference: "integration-test-message-topic-b-#{ctx.actor.id}",
+        reference: "integration-test-message-topic-b-#{ctx.machine.id}",
         namespace_id: namespace.id
       })
 

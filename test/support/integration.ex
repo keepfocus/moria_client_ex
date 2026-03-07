@@ -1,19 +1,20 @@
 defmodule Integration do
+  @super_credentials "moria-client-ex-super-credentials"
+
   def setup_client(_ctx) do
     datetime = DateTime.utc_now() |> DateTime.to_string()
     idx = :erlang.unique_integer([:positive])
+    client = MoriaClient.client(auth: {:bearer, @super_credentials})
 
-    {:ok, actor} =
-      MoriaClient.create_actor(MoriaClient.client(), %{
-        name: "MoriaClient integration test actor #{idx} - #{datetime}"
+    {:ok, machine} =
+      MoriaClient.create_machine(client, %{
+        name: "MoriaClient integration test machine #{idx} - #{datetime}"
       })
 
-    client = MoriaClient.client(auth: {:bearer, actor.token})
-
     ExUnit.Callbacks.on_exit(fn ->
-      :ok = MoriaClient.delete_actor(client, actor.id)
+      :ok = MoriaClient.delete_machine(client, machine.id)
     end)
 
-    %{actor: actor, client: client}
+    %{machine: machine, client: client}
   end
 end
