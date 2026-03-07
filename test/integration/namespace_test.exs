@@ -1,26 +1,16 @@
 defmodule Integration.NamespaceTest do
   use ExUnit.Case, async: true
   setup {Integration, :setup_client}
-  setup :setup_namespaces
+  setup {Integration, :setup_namespace}
+  setup :setup_second_namespace
 
-  defp setup_namespaces(ctx) do
-    idx = :erlang.unique_integer([:positive])
-    namespace_ref_1 = "integration-test-namespace-#{ctx.machine.id}-#{idx}-1"
-    namespace_ref_2 = "integration-test-namespace-#{ctx.machine.id}-#{idx}-2"
-
-    {:ok, namespace_1} = MoriaClient.create_namespace(ctx.client, %{reference: namespace_ref_1})
-    {:ok, namespace_2} = MoriaClient.create_namespace(ctx.client, %{reference: namespace_ref_2})
-
-    ExUnit.Callbacks.on_exit(fn ->
-      _ = MoriaClient.delete_namespace(ctx.client, namespace_1.id)
-      _ = MoriaClient.delete_namespace(ctx.client, namespace_2.id)
-      :ok
-    end)
+  defp setup_second_namespace(ctx) do
+    {:ok, namespace_2, namespace_ref_2} = Integration.create_namespace(ctx)
 
     %{
-      namespace_1: namespace_1,
+      namespace_1: ctx.namespace,
       namespace_2: namespace_2,
-      namespace_ref_1: namespace_ref_1,
+      namespace_ref_1: ctx.namespace_ref,
       namespace_ref_2: namespace_ref_2
     }
   end

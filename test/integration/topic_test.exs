@@ -1,23 +1,7 @@
 defmodule Integration.TopicTest do
   use ExUnit.Case, async: true
   setup {Integration, :setup_client}
-  setup :setup_namespace
-
-  defp setup_namespace(ctx) do
-    idx = :erlang.unique_integer([:positive])
-
-    {:ok, namespace} =
-      MoriaClient.create_namespace(ctx.client, %{
-        reference: "integration-test-topic-namespace-#{ctx.machine.id}-#{idx}"
-      })
-
-    ExUnit.Callbacks.on_exit(fn ->
-      _ = MoriaClient.delete_namespace(ctx.client, namespace.id)
-      :ok
-    end)
-
-    %{namespace: namespace}
-  end
+  setup {Integration, :setup_namespace}
 
   # Topic APIs
   test "topics CRUD", ctx do

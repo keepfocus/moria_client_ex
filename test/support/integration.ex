@@ -17,4 +17,27 @@ defmodule Integration do
 
     %{machine: machine, client: client}
   end
+
+  def setup_namespace(ctx) do
+    {:ok, namespace, namespace_ref} = create_namespace(ctx)
+
+    %{namespace: namespace, namespace_ref: namespace_ref}
+  end
+
+  def create_namespace(ctx, prefix \\ "integration-test-namespace") do
+    idx = :erlang.unique_integer([:positive])
+    namespace_ref = "#{prefix}-#{ctx.machine.id}-#{idx}"
+
+    {:ok, namespace} =
+      MoriaClient.create_namespace(ctx.client, %{
+        reference: namespace_ref
+      })
+
+    ExUnit.Callbacks.on_exit(fn ->
+      _ = MoriaClient.delete_namespace(ctx.client, namespace.id)
+      :ok
+    end)
+
+    {:ok, namespace, namespace_ref}
+  end
 end
