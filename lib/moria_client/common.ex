@@ -14,6 +14,9 @@ defmodule MoriaClient.Common do
         else
           Helpers.handle_common_errors(env)
         end
+
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 end
