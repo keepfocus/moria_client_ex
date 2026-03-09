@@ -21,14 +21,6 @@ defmodule MoriaClient.Machines.Machine do
 
   def changeset(machine \\ %__MODULE__{}, attrs) do
     machine
-    |> Ecto.Changeset.cast(attrs, [
-      :id,
-      :name,
-      :description,
-      :actor_id,
-      :organization_id,
-      :inserted_at,
-      :updated_at
-    ])
+    |> Ecto.Changeset.cast(attrs, __schema__(:fields) -- __schema__(:embeds))
   end
 end
