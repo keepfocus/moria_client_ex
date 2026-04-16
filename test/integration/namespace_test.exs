@@ -1,46 +1,52 @@
 defmodule Integration.NamespaceTest do
   use ExUnit.Case, async: true
   setup {Integration, :setup_client}
+  setup {Integration, :setup_namespace}
+  setup :setup_second_namespace
+
+  defp setup_second_namespace(ctx) do
+    {:ok, namespace_2, namespace_ref_2} = Integration.create_namespace(ctx)
+
+    %{
+      namespace_1: ctx.namespace,
+      namespace_2: namespace_2,
+      namespace_ref_1: ctx.namespace_ref,
+      namespace_ref_2: namespace_ref_2
+    }
+  end
 
   # Namespace APIs
   test "namespace CRUD", ctx do
-    namespace_ref_1 = "integration-test-namespace-#{ctx.actor.id}-1"
-    namespace_ref_2 = "integration-test-namespace-#{ctx.actor.id}-2"
-    {:ok, namespace_1} = MoriaClient.create_namespace(ctx.client, %{reference: namespace_ref_1})
-    assert namespace_1.reference == namespace_ref_1
-    {:ok, namespace_2} = MoriaClient.create_namespace(ctx.client, %{reference: namespace_ref_2})
+    namespace_1 = ctx.namespace_1
+    namespace_2 = ctx.namespace_2
+    namespace_ref_1 = ctx.namespace_ref_1
+    namespace_ref_2 = ctx.namespace_ref_2
 
-    # can list namespaces and find created ones
-    {:ok, page} = MoriaClient.list_namespaces(ctx.client)
-    assert Enum.all?(page.namespaces, fn ns -> ns.id in [namespace_1.id, namespace_2.id] end)
+    assert namespace_1.reference == namespace_ref_1
+    assert namespace_2.reference == namespace_ref_2
+
+    # can stream namespaces and find created ones even in shared datasets
+    streamed_refs =
+      MoriaClient.stream_namespaces!(ctx.client, first: 50)
+      |> Enum.map(& &1.reference)
+
+    assert namespace_ref_1 in streamed_refs
+    assert namespace_ref_2 in streamed_refs
 
     # can paginate namespaces
     assert {:ok, page_1} = MoriaClient.list_namespaces(ctx.client, first: 1, after: nil)
+    assert length(page_1.namespaces) == 1
     assert page_1.page.has_next_page
-    assert %{namespaces: [%{reference: ^namespace_ref_1}]} = page_1
+
     # next page
     assert {:ok, page_2} =
              MoriaClient.list_namespaces(ctx.client, first: 1, after: page_1.page.end_cursor)
 
-    refute page_2.page.has_next_page
-    assert %{namespaces: [%{reference: ^namespace_ref_2}]} = page_2
+    assert length(page_2.namespaces) == 1
+    refute hd(page_1.namespaces).id == hd(page_2.namespaces).id
 
-    # can stream namespaces via stream_namespaces/2
-    # (we set first: 1 to force multiple pages)
-    assert [
-             %{reference: ^namespace_ref_1},
-             %{reference: ^namespace_ref_2}
-           ] =
-             MoriaClient.stream_namespaces!(ctx.client, first: 1)
-             |> Enum.to_list()
-
-    # (also works with default opts)
-    assert [
-             %{reference: ^namespace_ref_1},
-             %{reference: ^namespace_ref_2}
-           ] =
-             MoriaClient.stream_namespaces!(ctx.client)
-             |> Enum.to_list()
+    # stream_namespaces!/2 works with default opts too
+    assert MoriaClient.stream_namespaces!(ctx.client) |> Enum.take(1) |> length() == 1
 
     # can update namespace
     new_reference = namespace_1.reference <> "-updated"

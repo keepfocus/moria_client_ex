@@ -1,43 +1,35 @@
 defmodule Integration.TopicTest do
   use ExUnit.Case, async: true
   setup {Integration, :setup_client}
+  setup {Integration, :setup_namespace}
 
   # Topic APIs
   test "topics CRUD", ctx do
-    {:ok, namespace} =
-      MoriaClient.create_namespace(ctx.client, %{
-        reference: "integration-test-topic-namespace-#{ctx.actor.id}"
-      })
+    namespace = ctx.namespace
 
-    topic_ref_1 = "integration-test-topic-#{ctx.actor.id}-1"
-    topic_ref_2 = "integration-test-topic-#{ctx.actor.id}-2"
+    topic_ref_1 = "integration-test-topic-#{ctx.machine.id}-1"
+    topic_ref_2 = "integration-test-topic-#{ctx.machine.id}-2"
 
     {:ok, topic_1} =
       MoriaClient.create_topic(ctx.client, %{
         reference: topic_ref_1,
-        namespace_id: namespace.id,
-        metadata: [%{key: "foo", value: "bar"}]
+        namespace_id: namespace.id
       })
 
     assert topic_1.reference == topic_ref_1
 
-    {:ok, topic_2} =
+    {:ok, _topic_2} =
       MoriaClient.create_topic(ctx.client, %{
         reference: topic_ref_2,
-        namespace_id: namespace.id,
-        metadata: [%{key: "foo", value: "baz"}]
+        namespace_id: namespace.id
       })
-
-    # can list topics and find created ones
-    {:ok, page} = MoriaClient.list_topics(ctx.client)
-    assert Enum.all?(page.topics, fn t -> t.id in [topic_1.id, topic_2.id] end)
 
     # can paginate topics
     assert {:ok, page_1} =
              MoriaClient.list_topics(ctx.client,
                first: 1,
                after: nil,
-               filters: [%{field: :metadata, value: "foo"}]
+               filters: [%{field: :namespace_id, value: namespace.id}]
              )
 
     assert page_1.page.has_next_page
@@ -48,7 +40,7 @@ defmodule Integration.TopicTest do
              MoriaClient.list_topics(ctx.client,
                first: 1,
                after: page_1.page.end_cursor,
-               filters: [%{field: :metadata, value: "foo"}]
+               filters: [%{field: :namespace_id, value: namespace.id}]
              )
 
     refute page_2.page.has_next_page
@@ -62,7 +54,7 @@ defmodule Integration.TopicTest do
            ] =
              MoriaClient.stream_topics!(ctx.client,
                first: 1,
-               filters: [%{field: :metadata, value: "foo"}]
+               filters: [%{field: :namespace_id, value: namespace.id}]
              )
              |> Enum.to_list()
 
@@ -85,22 +77,15 @@ defmodule Integration.TopicTest do
   end
 
   test "topic device summary", ctx do
-    {:ok, namespace} =
-      MoriaClient.create_namespace(ctx.client, %{
-        reference: "integration-test-topic-namespace-#{ctx.actor.id}"
-      })
+    namespace = ctx.namespace
 
-    on_exit(fn -> MoriaClient.delete_namespace(ctx.client, namespace.id) end)
-
-    topic_ref = "integration-test-topic-#{ctx.actor.id}-1"
+    topic_ref = "integration-test-topic-#{ctx.machine.id}-1"
 
     {:ok, topic} =
       MoriaClient.create_topic(ctx.client, %{
         reference: topic_ref,
         namespace_id: namespace.id
       })
-
-    on_exit(fn -> MoriaClient.delete_topic(ctx.client, topic.id) end)
 
     json = %{
       "identification" => %{"dlms_flag_id" => "KAM", "identification_number" => "12345678"}
