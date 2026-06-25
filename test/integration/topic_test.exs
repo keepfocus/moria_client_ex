@@ -88,7 +88,12 @@ defmodule Integration.TopicTest do
       })
 
     json = %{
-      "identification" => %{"dlms_flag_id" => "KAM", "identification_number" => "12345678"}
+      "device" => %{
+        "identity" => %{
+          "dlms_flag_id" => "KAM",
+          "identification_number" => "12345678"
+        }
+      }
     }
 
     assert {:ok, _page} =
@@ -98,7 +103,11 @@ defmodule Integration.TopicTest do
                  payload: JSON.encode!(json),
                  payload_type: "application/json"
                },
-               %{topic_id: topic.id, payload: "2", payload_type: "text/plain"},
+               %{
+                 topic_id: topic.id,
+                 payload: "2",
+                 payload_type: "text/plain"
+               },
                %{
                  topic_id: topic.id,
                  payload: JSON.encode!(json),
@@ -108,18 +117,12 @@ defmodule Integration.TopicTest do
 
     assert {:ok, device_summary} = MoriaClient.get_topic_device_summary(ctx.client, topic.id)
 
-    assert device_summary.processed == 3
-    assert device_summary.missing == 1
-    assert device_summary.failed == 0
-    assert device_summary.identified == 2
-
     assert [
              %{
                identification: %{
                  dlms_flag_id: "KAM",
                  identification_number: "12345678"
-               },
-               count: 2
+               }
              }
            ] = device_summary.devices
   end

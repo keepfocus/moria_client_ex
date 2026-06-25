@@ -5,10 +5,12 @@ defmodule Integration do
     datetime = DateTime.utc_now() |> DateTime.to_string()
     idx = :erlang.unique_integer([:positive])
     client = MoriaClient.client(auth: {:bearer, @super_credentials})
+    {:ok, %{machine: %{organization_id: organization_id}}} = MoriaClient.me(client)
 
     {:ok, machine} =
       MoriaClient.create_machine(client, %{
-        name: "MoriaClient integration test machine #{idx} - #{datetime}"
+        name: "MoriaClient integration test machine #{idx} - #{datetime}",
+        organization_id: organization_id
       })
 
     ExUnit.Callbacks.on_exit(fn ->
@@ -30,7 +32,8 @@ defmodule Integration do
 
     {:ok, namespace} =
       MoriaClient.create_namespace(ctx.client, %{
-        reference: namespace_ref
+        reference: namespace_ref,
+        organization_id: ctx.machine.organization_id
       })
 
     ExUnit.Callbacks.on_exit(fn ->

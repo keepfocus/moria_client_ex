@@ -72,6 +72,7 @@ defmodule MoriaClient do
   ##
 
   defdelegate status(client), to: MoriaClient.Status
+  defdelegate me(client), to: MoriaClient.Status
 
   ##
   ## Helpers

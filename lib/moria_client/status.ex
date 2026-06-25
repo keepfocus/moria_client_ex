@@ -16,4 +16,13 @@ defmodule MoriaClient.Status do
       Helpers.to_schema(env.body, MoriaClient.Status.StatusInfo)
     end
   end
+
+  def me(client) do
+    url = "/api/v1/me"
+    req = [method: :get, url: url]
+
+    with {:ok, env} <- MoriaClient.Common.request(client, req, [200]) do
+      Helpers.to_schema(env.body, MoriaClient.Status.Me)
+    end
+  end
 end
