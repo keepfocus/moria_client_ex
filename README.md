@@ -1,6 +1,6 @@
 # MoriaClient
 
-API client for the Moria log storage service.  
+API client for the Moria log storage service.
 This code-base is useless without access to a Moria server.
 
 ## Installation
@@ -14,7 +14,7 @@ def deps do
     {:moria_client, "~> 0.1.0"}
 
     # Or from github:
-    {:moria_client, git: "https://github.com/keepfocus/moria_client_ex.git", branch: "main"},
+    {:moria_client, git: "https://github.com/wise-home/moria_client_ex.git", branch: "main"},
   ]
 end
 ```
